@@ -23,24 +23,24 @@
  * @returns {Card[]}
  */
 function getContextualAddOn(event) {
-  var card = CardService.newCardBuilder();
-  card.setHeader(CardService.newCardHeader().setTitle('Log Your Expense'));
-
-  var section = CardService.newCardSection();
-  section.addWidget(CardService.newTextInput()
-    .setFieldName('Date')
-    .setTitle('Date'));
-  section.addWidget(CardService.newTextInput()
-    .setFieldName('Amount')
-    .setTitle('Amount'));
-  section.addWidget(CardService.newTextInput()
-    .setFieldName('Description')
-    .setTitle('Description'));
-  section.addWidget(CardService.newTextInput()
-    .setFieldName('Spreadsheet URL')
-    .setTitle('Spreadsheet URL'));
-
-  card.addSection(section);
+  var message = getCurrentMessage(event);
+  var prefills = [getReceivedDate(message),
+    getLargestAmount(message),
+    getExpenseDescription(message),
+    getSheetUrl()];
+  var card = createExpensesCard(prefills);
 
   return [card.build()];
+}
+
+/**
+ * Retrieves the current message given an action event object.
+ * @param {Event} event Action event object
+ * @return {Message}
+ */
+function getCurrentMessage(event) {
+  var accessToken = event.messageMetadata.accessToken;
+  var messageId = event.messageMetadata.messageId;
+  GmailApp.setCurrentMessageAccessToken(accessToken);
+  return GmailApp.getMessageById(messageId);
 }
