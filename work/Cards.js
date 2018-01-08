@@ -1,3 +1,19 @@
+/**
+ * Copyright 2017 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 var FIELDNAMES = ['Date', 'Amount', 'Description', 'Spreadsheet URL'];
 
 /**
@@ -49,5 +65,55 @@ function createFormSection(section, inputNames, opt_prefills) {
         }
         section.addWidget(widget);
     }
+
+    var submitForm = CardService.newAction().setFunctionName('submitForm');
+    var submitButton = CardService.newTextButton()
+        .setText('Submit')
+        .setOnClickAction(submitForm);
+    section.addWidget(CardService.newButtonSet().addButton(submitButton));
+
     return section;
+}
+
+/**
+ * Logs form inputs into a spreadsheet given by URL from form.
+ * Then displays edit card.
+ *
+ * @param {Event} e An event object containing form inputs and parameters.
+ * @returns {Card}
+ */
+function submitForm(e) {
+    var res = e['formInput'];
+    try {
+        FIELDNAMES.forEach(function(fieldName) {
+            if (! res[fieldName]) {
+                throw 'incomplete form';
+            }
+        });
+        var sheet = SpreadsheetApp
+            .openByUrl((res['Spreadsheet URL']))
+            .getActiveSheet();
+        sheet.appendRow(objToArray(res, FIELDNAMES.slice(0, FIELDNAMES.length - 1)));
+        return createExpensesCard(null, 'Logged expense successfully!').build();
+    }
+    catch (err) {
+        if (err == 'Exception: Invalid argument: url') {
+            err = 'Invalid URL';
+            res['Spreadsheet URL'] = null;
+        }
+        return createExpensesCard(objToArray(res, FIELDNAMES), 'Error: ' + err).build();
+    }
+}
+
+/**
+ * Returns an array corresponding to the given object and desired ordering of keys.
+ *
+ * @param {Object} obj Object whose values will be returned as an array.
+ * @param {String[]} keys An array of key names in the desired order.
+ * @returns {Object[]}
+ */
+function objToArray(obj, keys) {
+    return keys.map(function(key) {
+        return obj[key];
+    });
 }
