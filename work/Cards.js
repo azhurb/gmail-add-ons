@@ -28,6 +28,14 @@ function createExpensesCard(opt_prefills, opt_status) {
     var card = CardService.newCardBuilder();
     card.setHeader(CardService.newCardHeader().setTitle('Log Your Expense'));
 
+    var clearForm = CardService.newAction()
+        .setFunctionName('clearForm')
+        .setParameters({'Status': opt_status ? opt_status : ''});
+    var clearAction = CardService.newCardAction()
+        .setText('Clear form')
+        .setOnClickAction(clearForm);
+    card.addCardAction(clearAction);
+
     if (opt_status) {
         if (opt_status.indexOf('Error: ') == 0) {
             opt_status = '<font color=\'#FF0000\'>' + opt_status + '</font>';
@@ -117,4 +125,8 @@ function objToArray(obj, keys) {
     return keys.map(function(key) {
         return obj[key];
     });
+}
+
+function clearForm(e) {
+    return createExpensesCard(null, e['parameters']['Status']).build();
 }
