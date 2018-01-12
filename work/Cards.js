@@ -50,7 +50,21 @@ function createExpensesCard(opt_prefills, opt_status) {
 
     var formSection = createFormSection(CardService.newCardSection(),
         FIELDNAMES, opt_prefills);
+
+    var newSheetSection = CardService.newCardSection();
+    var sheetName = CardService.newTextInput()
+        .setFieldName('Sheet Name')
+        .setTitle('Sheet Name');
+    var createExpensesSheet = CardService.newAction()
+        .setFunctionName('createExpensesSheet');
+    var newSheetButton = CardService.newTextButton()
+        .setText('New Sheet')
+        .setOnClickAction(createExpensesSheet);
+    newSheetSection.addWidget(sheetName);
+    newSheetSection.addWidget(CardService.newButtonSet().addButton(newSheetButton));
+
     card.addSection(formSection);
+    card.addSection(newSheetSection);
 
     return card;
 }
